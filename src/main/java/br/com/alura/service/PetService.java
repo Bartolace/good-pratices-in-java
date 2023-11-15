@@ -3,8 +3,6 @@ package br.com.alura.service;
 import br.com.alura.client.ClientHttpConfiguration;
 import br.com.alura.domain.Pet;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,7 +23,6 @@ public class PetService {
     public void importarPetsDoAbrigo() throws IOException, InterruptedException {
         System.out.println("Digite o id ou nome do abrigo:");
         String idOuNome = new Scanner(System.in).nextLine();
-
         System.out.println("Digite o nome do arquivo CSV:");
         String nomeArquivo = new Scanner(System.in).nextLine();
 
@@ -33,28 +30,22 @@ public class PetService {
         try {
             reader = new BufferedReader(new FileReader(nomeArquivo));
         } catch (IOException e) {
-            System.out.println("Erro ao carregar o arquivo: " + nomeArquivo);
+            System.out.println("Erro ao carregar o arquivo: " +nomeArquivo);
         }
         String line;
         while ((line = reader.readLine()) != null) {
             String[] campos = line.split(",");
-            String tipo = campos[0];
+            String tipo = campos[0].toUpperCase();
             String nome = campos[1];
             String raca = campos[2];
             int idade = Integer.parseInt(campos[3]);
             String cor = campos[4];
             Float peso = Float.parseFloat(campos[5]);
 
-            JsonObject json = new JsonObject();
-            json.addProperty("tipo", tipo.toUpperCase());
-            json.addProperty("nome", nome);
-            json.addProperty("raca", raca);
-            json.addProperty("idade", idade);
-            json.addProperty("cor", cor);
-            json.addProperty("peso", peso);
+            Pet pet = new Pet(tipo, nome, raca, idade, cor, peso);
 
             String uri = "http://localhost:8080/abrigos/" + idOuNome + "/pets";
-            HttpResponse<String> response = client.dispararRequisicaoPost(uri, json);
+            HttpResponse<String> response = client.dispararRequisicaoPost(uri, pet);
             int statusCode = response.statusCode();
             String responseBody = response.body();
             if (statusCode == 200) {
@@ -90,7 +81,9 @@ public class PetService {
             String nome = pet.getNome();
             String raca = pet.getRaca();
             int idade = pet.getIdade();
-            System.out.println(id + " - " + tipo + " - " + nome + " - " + raca + " - " + idade + " ano(s)");
+            String cor = pet.getCor();
+            System.out.println(id + " - " + tipo + " - " + nome + " - " + raca + " - " + idade + " ano(s)" + " - "
+                    + cor);
         }
     }
 
